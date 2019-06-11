@@ -28,6 +28,12 @@ packages(raster)
 packages(rgeos)
 packages(rgdal)
 
+packages(readxl)
+
+packages(dplyr)
+packages(ggplot2)
+packages(reshape2)
+
 ## Set the working directory
 rootdir       <- "~/ws_idn_20190611/"
 
