@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="tiling_system_aoi" id="tiling_system_aoi">
+	<SimpleField name="tileID" type="int"></SimpleField>
+</Schema>
+<Folder><name>tiling_system_aoi</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#tiling_system_aoi">
+		<SimpleData name="tileID">1</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>109.562809917355,-0.569421487603305 109.562809917355,-0.389759252605102 109.742472152354,-0.389759252605102 109.742472152354,-0.569421487603305 109.562809917355,-0.569421487603305</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#tiling_system_aoi">
+		<SimpleData name="tileID">2</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>109.742472152354,-0.569421487603305 109.742472152354,-0.389759252605102 109.922134387352,-0.389759252605102 109.922134387352,-0.569421487603305 109.742472152354,-0.569421487603305</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+</Folder>
+</Document></kml>
