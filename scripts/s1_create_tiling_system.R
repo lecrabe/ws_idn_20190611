@@ -109,6 +109,7 @@ df$tileID <- as.numeric(df$tileID)
 my_tiles <- tiles[tiles$tileID %in% df[df$username == username,"tileID"],]
 plot(my_tiles,add=T,col="yellow")
 plot(my_tiles)
+
 ### Export the final subset
 export_name <- paste0("tiles_",username)
 
