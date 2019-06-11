@@ -45,6 +45,7 @@ data_dir  <- paste0(rootdir,"data/")
 gadm_dir  <- paste0(rootdir,"data/gadm/")
 tile_dir  <- paste0(rootdir,"data/tiling/")
 aoi_dir   <- paste0(rootdir,"data/aoi/")
+phu_dir   <- paste0(rootdir,"data/phu/")
 
 dir.create(gadm_dir,showWarnings = F)
 dir.create(tile_dir,showWarnings = F)
