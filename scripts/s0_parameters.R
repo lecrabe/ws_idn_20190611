@@ -56,9 +56,11 @@ aoi_dir   <- paste0(rootdir,"data/aoi/")
 phu_dir   <- paste0(rootdir,"data/phu/")
 
 ts_dir    <- paste0("/home/",username,"/downloads/phu_tiles/")
+bfst_dir  <- paste0(rootdir,"data/bfast/")
 
 dir.create(gadm_dir,showWarnings = F)
 dir.create(tile_dir,showWarnings = F)
+dir.create(bfst_dir,showWarnings = F)
 
 
 
