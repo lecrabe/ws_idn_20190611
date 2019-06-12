@@ -28,19 +28,14 @@ packages(raster)
 packages(rgeos)
 packages(rgdal)
 
-<<<<<<< HEAD
-=======
+
 packages(readxl)
 
->>>>>>> 96a1690f9e63f8eb3b791d7a4c97eb7fdfda6c9e
 packages(dplyr)
 packages(ggplot2)
 packages(reshape2)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 96a1690f9e63f8eb3b791d7a4c97eb7fdfda6c9e
 ## Set the working directory
 rootdir       <- "~/ws_idn_20190611/"
 
