@@ -55,6 +55,7 @@ tile_dir  <- paste0(rootdir,"data/tiling/")
 aoi_dir   <- paste0(rootdir,"data/aoi/")
 phu_dir   <- paste0(rootdir,"data/brg_phu/")
 ace_dir   <- paste0(rootdir,"data/moef_phu/")
+knl_dir   <- paste0(rootdir,"data/KLHK_Sekat_Kanal_Aceh/")
 
 ts_dir    <- paste0("/home/",username,"/downloads/phu_tiles/")
 bfst_dir  <- paste0(rootdir,"data/bfast_aceh_",username,"/")
