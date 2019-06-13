@@ -24,6 +24,8 @@ proj4string(country)
 ## Display the SPDF
 plot(country)
 
+country$OBJECTID <- row(country)[,1]
+
 ##  Export the SpatialPolygonDataFrame as a ESRI Shapefile
 writeOGR(country,
          paste0(gadm_dir,"gadm_",countrycode,"_l1.shp"),
