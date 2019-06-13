@@ -55,6 +55,10 @@ aoi <- readOGR(paste0(ace_dir,"AOI_Tile_Aceh__Askary.shp"))
 proj4string(aoi)
 #aoi_3phu <- aoi[aoi$KODE_KHG %in% c("KHG.16.02.01","KHG.16.02.08","KHG.16.02.02"),]
 aoi <- spTransform(aoi,proj4string(sqr_df))
+
+kanal_block <- readOGR(paste0(knl_dir,"KLHK_Sekat_Kanal_Aceh.shp"))
+kanal_block <- spTransform(kanal_block,proj4string(sqr_df))
+
 ### Select a vector from location of another vector
 sqr_df_selected <- aoi
 
@@ -115,4 +119,4 @@ writeOGR(obj=my_tiles,
          driver = "KML",
          overwrite_layer = T)
 
-my_tiles$tileID
+my_tiles[kanal_block,]$tileID
