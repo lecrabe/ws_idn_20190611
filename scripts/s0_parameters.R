@@ -53,10 +53,11 @@ data_dir  <- paste0(rootdir,"data/")
 gadm_dir  <- paste0(rootdir,"data/gadm/")
 tile_dir  <- paste0(rootdir,"data/tiling/")
 aoi_dir   <- paste0(rootdir,"data/aoi/")
-phu_dir   <- paste0(rootdir,"data/phu/")
+phu_dir   <- paste0(rootdir,"data/brg_phu/")
+ace_dir   <- paste0(rootdir,"data/moef_phu/")
 
 ts_dir    <- paste0("/home/",username,"/downloads/phu_tiles/")
-bfst_dir  <- paste0(rootdir,"data/bfast/")
+bfst_dir  <- paste0(rootdir,"data/bfast_aceh_",username,"/")
 
 dir.create(gadm_dir,showWarnings = F)
 dir.create(tile_dir,showWarnings = F)
