@@ -52,18 +52,18 @@ nrow(sqr_df)
 
 ### Select a vector from location of another vector
 aoi <- readOGR(paste0(ace_dir,"AOI_Tile_Aceh__Askary.shp"))
-
+proj4string(aoi)
 #aoi_3phu <- aoi[aoi$KODE_KHG %in% c("KHG.16.02.01","KHG.16.02.08","KHG.16.02.02"),]
-
+aoi <- spTransform(aoi,proj4string(sqr_df))
 ### Select a vector from location of another vector
-sqr_df_selected <- sqr_df[aoi,]
+sqr_df_selected <- aoi
 
 nrow(sqr_df_selected)
 
 ### Plot the results
-# plot(sqr_df_selected)
-# plot(aoi,add=T,border="blue")
-# plot(country,add=T,border="green")
+plot(sqr_df_selected)
+plot(aoi,add=T,border="blue")
+plot(country,add=T,border="green")
 
 ### Give the output a decent name, with unique ID
 names(sqr_df_selected@data) <- "tileID" 
@@ -115,3 +115,4 @@ writeOGR(obj=my_tiles,
          driver = "KML",
          overwrite_layer = T)
 
+my_tiles$tileID
