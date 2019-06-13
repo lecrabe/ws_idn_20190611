@@ -119,4 +119,9 @@ writeOGR(obj=my_tiles,
          driver = "KML",
          overwrite_layer = T)
 
-my_tiles[kanal_block,]$tileID
+
+
+du    <- data.frame(cbind(users$UserName,tiles[kanal_block,]$tileID))
+names(du) <- c("username","tileID")
+du
+du[du$username == username,"tileID"]
