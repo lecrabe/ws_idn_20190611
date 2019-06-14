@@ -6,6 +6,9 @@ ope_dir <- paste0(res_dir,"operators/")
 dbf <- read.dbf(paste0(luc_dir,"PL_2015_2016__Planologi_KLHK__Rev_Topology.dbf"))
 table(dbf$PL__2016,dbf$PL16_ID)
 
+# all_phu <- readOGR(paste0(ace_dir,"all_phu_indonesia_latlon.shp"))
+# all_phu$id <- row(all_phu@data)[,1]
+# writeOGR(all_phu,paste0(ace_dir,"all_phu_indonesia_latlon.shp"),"all_phu_indonesia_latlon","ESRI Shapefile",overwrite_layer = T)
 ####################  CREATE A PSEUDO COLOR TABLE
 cols <- col2rgb(c("black","beige","yellow","orange","red","darkred","palegreen","green2","forestgreen",'darkgreen'))
 pct <- data.frame(cbind(c(0:9),
@@ -29,7 +32,7 @@ write.table(pct,paste0(res_dir,"color_table_combine.txt"),row.names = F,col.name
 ####################  CREATE INDEX OF EXISTING TILES
 system(sprintf("gdaltindex %s %s",
                paste0(res_dir,"index_results.shp"),
-               paste0(ope_dir,"bfast_aceh*/*2019.tif")
+               paste0(ope_dir,"bfast_*/*2019.tif")
 ))
 
 ####################  MERGE AS HOMOGENEOUS BLOCKS
@@ -59,10 +62,11 @@ table(tiles$fusion_id)
 
 writeOGR(tiles,paste0(res_dir,"index_results.shp"),"index_results","ESRI Shapefile",overwrite_layer = T)
 
-k <- 14
+k <- 13
+
 ####################  LOOP THROUGH EACH BLOCK 
 
-for(k in unique(tiles$fusion_id)){
+for(k in unique(tiles$fusion_id)[4:14]){
   
   blk_dir <- paste0(res_dir,"block",k,"/") 
   dir.create(blk_dir,showWarnings = F)
@@ -72,18 +76,18 @@ for(k in unique(tiles$fusion_id)){
   date     <- paste0(blk_dir,"tmp_block_",k,"_date.tif")
   magn     <- paste0(blk_dir,"tmp_block_",k,"_magnitude.tif")
   
-  ####################  MERGE TILES FOR THE BLOCK
+  ###################  MERGE TILES FOR THE BLOCK
   system(sprintf("gdal_merge.py -o %s -co COMPRESS=LZW -v %s",
                  block,
                  to_merge))
   
   ####################  EXTRACT DATE
-  system(sprintf("gdal_translate -b 1 %s %s",
+  system(sprintf("gdal_translate -b 1 -co COMPRESS=LZW %s %s",
                  block,
                  date))
   
   ####################  EXTRACT MAGNITUDE
-  system(sprintf("gdal_translate -b 2 %s %s",
+  system(sprintf("gdal_translate -b 2 -co COMPRESS=LZW %s %s",
                  block,
                  magn))
   
@@ -100,16 +104,43 @@ for(k in unique(tiles$fusion_id)){
   means_b2  <- as.numeric(unlist(strsplit(s[grepl("STATISTICS_MEAN",s)],"="))[2])
   stdevs_b2 <- as.numeric(unlist(strsplit(s[grepl("STATISTICS_STDDEV",s)],"="))[2])
   
-  ####################  GET AOI LIMITS
-  system(sprintf("python %s/oft-rasterize_attr.py -v %s -i %s -o %s -a %s",
-                 scriptdir,
-                 paste0(phu_dir,"107_PHU_BOUNDARY.shp"),
-                 block,
-                 paste0(aoi_dir,"aoi_block_",k,".tif"),
-                 "OBJECTID"
-  ))
+  # ####################  GET AOI LIMITS
+  # system(sprintf("python %s/oft-rasterize_attr.py -v %s -i %s -o %s -a %s",
+  #                scriptdir,
+  #                paste0(ace_dir,"all_phu_indonesia_latlon.shp"),
+  #                block,
+  #                paste0(blk_dir,"aoi_block_",k,".tif"),
+  #                "id"
+  # ))
   
+  # ####################  GET AOI LIMITS
+  # system(sprintf("python %s/oft-rasterize_attr.py -v %s -i %s -o %s -a %s",
+  #                scriptdir,
+  #                paste0(res_dir,"index_results.shp"),
+  #                block,
+  #                paste0(blk_dir,"aoi_block_",k,".tif"),
+  #                "fusion_id"
+  # ))
 
+  ####################  GET LCLU MAP
+  system(sprintf("python %s/oft-rasterize_attr_int16.py -v %s -i %s -o %s -a %s",
+                 scriptdir,
+                 paste0(luc_dir,"PL_2015_2016__Planologi_KLHK__Rev_Topology.shp"),
+                 block,
+                 paste0(blk_dir,"lulc_block_",k,".tif"),
+                 "PL16_ID"
+  ))  
+  
+  ####################  GET LCLU MAP
+  system(sprintf("python %s/oft-rasterize_attr_int16.py -v %s -i %s -o %s -a %s",
+                 scriptdir,
+                 paste0(ace_dir,"all_phu_indonesia_latlon.shp"),
+                 block,
+                 paste0(blk_dir,"phu_block_",k,".tif"),
+                 "id"
+  ))  
+  
+  
   # #############################################################
   # ### CROP AMPLITUDE TO AOI
   # system(sprintf("gdal_calc.py -A %s --A_band=2 -B %s --co=COMPRESS=LZW --overwrite --outfile=%s --calc=\"%s\"",
@@ -129,11 +160,13 @@ for(k in unique(tiles$fusion_id)){
   # ))
 
   ####################  COMPUTE THRESHOLDS LAYER
-  system(sprintf("gdal_calc.py -A %s -B %s --co=COMPRESS=LZW --type=Byte --overwrite --outfile=%s --calc=\"%s\"",
+  system(sprintf("gdal_calc.py -A %s -B %s -C %s --co=COMPRESS=LZW --type=Byte --overwrite --outfile=%s --calc=\"%s\"",
                  magn,
-                 paste0(aoi_dir,"aoi_block_",k,".tif"),
+                 paste0(blk_dir,"phu_block_",k,".tif"),
+                 paste0(blk_dir,"lulc_block_",k,".tif"),
                  paste0(blk_dir,"tmp_bfast_threshold_block_",k,".tif"),
-                 paste0("(B>0)*(",
+                 #paste0("((B==0)+(A==0))*0+((A>0)+(A<0))*(B>0)*((B==5001)*1+((B<5001)+(B>5001))*(",
+                 paste0("(B>0)*((C==5001)*1+((C>5001)+(C<5001))*(",
                         '(A<=',(maxs_b2),")*",
                         '(A>' ,(means_b2+(stdevs_b2*4)),")*9+",
                         '(A<=',(means_b2+(stdevs_b2*4)),")*",
@@ -151,7 +184,7 @@ for(k in unique(tiles$fusion_id)){
                         '(A>=',(means_b2-(stdevs_b2*3)),")*",
                         '(A<' ,(means_b2-(stdevs_b2*2)),")*3+",
                         '(A>=',(means_b2-(stdevs_b2*2)),")*",
-                        '(A<' ,(means_b2-(stdevs_b2)),")*2)")
+                        '(A<' ,(means_b2-(stdevs_b2)),")*2))")
   ))
   
   
@@ -170,46 +203,47 @@ for(k in unique(tiles$fusion_id)){
                  paste0(res_dir,"bfast_block_",k,"_threshold.tif")
   ))
 
-  ####################  GET LCLU MAP
-  system(sprintf("python %s/oft-rasterize_attr_int16.py -v %s -i %s -o %s -a %s",
-                 scriptdir,
-                 paste0(luc_dir,"PL_2015_2016__Planologi_KLHK__Rev_Topology.shp"),
-                 block,
-                 paste0(blk_dir,"lulc_block_",k,".tif"),
-                 "PL16_ID"
-  ))  
+
   
-  ####################  COMBINE LULC WITH THRESHOLDS
-  system(sprintf("gdal_calc.py -A %s -B %s --co=COMPRESS=LZW --overwrite --outfile=%s --calc=\"%s\"",
-                 paste0(blk_dir,"lulc_block_",k,".tif"),
-                 paste0(res_dir,"bfast_block_",k,"_threshold.tif"),
-                 paste0(blk_dir,"tmp_bfast_combine_lulc_block_",k,".tif"),
-                 paste0("(B==1)*1 +(B>1)*(",
-                        "(A==5001)*1+",
-                        "(A==2010)*(B>1)*3 +",
-                        "(A==2006)*(B>1)*4 +",
-                        "((A==2001)+(A==2004)+(A==2005))*(B>1)*(B<6)*21 +",
-                        "((A==2002)+(A==20041)+(A==20051))*(B>1)*(B<6)*22 +",
-                        "((A==2001)+(A==2002)+(A==2004)+(A==2005)+(A==20041)+(A==20051))*(B>=6)*2 +",
-                        "((A==2007)+(A==20071)+(A==2012)+(A==2014)+(A==3000)+(A>=20091))*(B>=6)*5 +",
-                        "((A==2007)+(A==20071)+(A==2012)+(A==2014)+(A==3000)+(A>=20091))*(B<6)*6)"
-                        )
-  ))
-  
-  ################################################################################
-  ## Add pseudo color table to result
-  system(sprintf("(echo %s) | oft-addpct.py %s %s",
-                 paste0(res_dir,"color_table_combine.txt"),
-                 paste0(blk_dir,"tmp_bfast_combine_lulc_block_",k,".tif"),
-                 paste0(blk_dir,"tmp_bfast_combine_lulc_block_pct_",k,".tif")
-  ))
-  
-  ## Compress final result
-  system(sprintf("gdal_translate -ot Byte -co COMPRESS=LZW %s %s",
-                 paste0(blk_dir,"tmp_bfast_combine_lulc_block_pct_",k,".tif"),
-                 paste0(res_dir,"bfast_block_",k,"_threshold_combine.tif")
-  ))
-  
+  # ####################  COMBINE LULC WITH THRESHOLDS
+  # system(sprintf("gdal_calc.py -A %s -B %s --co=COMPRESS=LZW --overwrite --outfile=%s --calc=\"%s\"",
+  #                paste0(blk_dir,"lulc_block_",k,".tif"),
+  #                paste0(res_dir,"bfast_block_",k,"_threshold.tif"),
+  #                paste0(blk_dir,"tmp_bfast_combine_lulc_block_",k,".tif"),
+  #                paste0("(B==1)*1 +(B>1)*(",
+  #                       "(A==5001)*1+",
+  #                       "(A==2010)*(B>1)*3 +",
+  #                       "(A==2006)*(B>1)*4 +",
+  #                       "((A==2001)+(A==2004)+(A==2005))*(B>1)*(B<6)*21 +",
+  #                       "((A==2002)+(A==20041)+(A==20051))*(B>1)*(B<6)*22 +",
+  #                       "((A==2001)+(A==2002)+(A==2004)+(A==2005)+(A==20041)+(A==20051))*(B>=6)*2 +",
+  #                       "((A==2007)+(A==20071)+(A==2012)+(A==2014)+(A==3000)+(A>=20091))*(B>=6)*5 +",
+  #                       "((A==2007)+(A==20071)+(A==2012)+(A==2014)+(A==3000)+(A>=20091))*(B<6)*6)"
+  #                       )
+  # ))
+
+  # ####################  COMBINE LULC WITH THRESHOLDS
+  # system(sprintf("gdal_calc.py -A %s -B %s --co=COMPRESS=LZW --overwrite --outfile=%s --calc=\"%s\"",
+  #                paste0(blk_dir,"lulc_block_",k,".tif"),
+  #                paste0(res_dir,"bfast_block_",k,"_threshold.tif"),
+  #                paste0(blk_dir,"tmp_bfast_combine_lulc_block_",k,".tif"),
+  #                paste0("((A==0)+(A==5001))*0+(A>0)*((A<5001)+(A>5001))*B")
+  # ))
+  # 
+  # ################################################################################
+  # ## Add pseudo color table to result
+  # system(sprintf("(echo %s) | oft-addpct.py %s %s",
+  #                paste0(res_dir,"color_table.txt"),
+  #                paste0(blk_dir,"tmp_bfast_combine_lulc_block_",k,".tif"),
+  #                paste0(blk_dir,"tmp_bfast_combine_lulc_block_pct_",k,".tif")
+  # ))
+  # 
+  # ## Compress final result
+  # system(sprintf("gdal_translate -ot Byte -co COMPRESS=LZW %s %s",
+  #                paste0(blk_dir,"tmp_bfast_combine_lulc_block_pct_",k,".tif"),
+  #                paste0(res_dir,"bfast_block_",k,"_threshold_combine.tif")
+  # ))
+  # 
   ## Year of disturbance
   system(sprintf("gdal_calc.py -A %s --co=COMPRESS=LZW --type=UInt16 --overwrite --outfile=%s --calc=\"%s\"",
                  date,
@@ -227,3 +261,4 @@ for(k in unique(tiles$fusion_id)){
   system(sprintf("rm -r -f %s",
                  paste0(blk_dir,"tmp*.tif")))
 }
+  
