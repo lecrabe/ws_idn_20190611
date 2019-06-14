@@ -57,7 +57,7 @@ phu_dir   <- paste0(rootdir,"data/brg_phu/")
 ace_dir   <- paste0(rootdir,"data/moef_phu/")
 knl_dir   <- paste0(rootdir,"data/KLHK_Sekat_Kanal_Aceh/")
 
-ts_dir    <- paste0("/home/",username,"/downloads/phu_tiles/")
+ts_dir    <- paste0("/home/",username,"/downloads/tiles_aceh/")
 bfst_dir  <- paste0(rootdir,"data/bfast_aceh_",username,"/")
 
 dir.create(gadm_dir,showWarnings = F)
