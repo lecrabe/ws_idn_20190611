@@ -1,7 +1,7 @@
-res_dir <- paste0(rootdir,"results/results_day3/")
+res_dir <- paste0(smm_dir,"extra/")
 
-
-for(tile_dir in list.dirs(res_dir)[-1]){
+postprocess_pysmm <- function(tile_dir){
+  
   tile_dir <- paste0(tile_dir,"/")
   base <- "SMCmap_"
   
@@ -25,11 +25,11 @@ for(tile_dir in list.dirs(res_dir)[-1]){
                    paste0(tile_dir,"tmp_closing.tif"),
                    paste0(tile_dir,"close_",file),
                    "(A==0)*B+A"
-                   ))
+    ))
     
     system(sprintf("rm -r -f %s",
                    paste0(tile_dir,"tmp_closing.tif")
-                   ))
+    ))
     
   }
   
@@ -65,11 +65,19 @@ for(tile_dir in list.dirs(res_dir)[-1]){
   
   slope <- calc(r, fun_slope)
   pvalue <- calc(r,fun_pvalue)
-
+  
   plot(slope)
   plot(pvalue)
-
+  
   writeRaster(slope,paste0(tile_dir,"slope.tif"),overwrite=T)
   writeRaster(pvalue,paste0(tile_dir,"pvalue.tif"),overwrite=T)
   
 }
+
+for(tile_dir in list.dirs(res_dir)[-1]){
+  postprocess_pysmm(tile_dir)}
+
+the_folder_you_want <- "/home/waluyo/smm_maps/example/"
+postprocess_pysmm(the_folder_you_want)
+
+
